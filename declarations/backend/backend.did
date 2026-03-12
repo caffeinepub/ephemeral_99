@@ -1,0 +1,128 @@
+type _CaffeineStorageRefillResult = record {
+  success : opt bool;
+  topped_up_amount : opt nat;
+};
+type _CaffeineStorageRefillInformation = record {
+  proposed_top_up_amount : opt nat;
+};
+type _CaffeineStorageCreateCertificateResult = record {
+  blob_hash : text;
+  method : text;
+};
+type UserSearchResult = record {
+  name : text;
+  "principal" : principal;
+  username : text;
+};
+type StreakView = record {
+  count : nat;
+  friendName : text;
+  friendPrincipal : principal;
+  friendUsername : text;
+  isAtRisk : bool;
+  lastExchangeAt : int;
+};
+type StoryView = record {
+  author : principal;
+  authorName : text;
+  authorUsername : text;
+  createdAt : int;
+  mediaType : text;
+  storyId : nat;
+};
+type StoryMediaResult = record {
+  mediaBlob : ExternalBlob;
+  mediaType : text;
+};
+type SnapViewResult = record {
+  expirationSeconds : nat;
+  mediaBlob : ExternalBlob;
+  mediaType : text;
+};
+type SentSnapItem = record {
+  createdAt : int;
+  recipientCount : nat;
+  snapId : nat;
+  viewedCount : nat;
+};
+type Profile = record {
+  name : text;
+  username : text;
+};
+type InboxItem = record {
+  createdAt : int;
+  expirationSeconds : nat;
+  isViewed : bool;
+  sender : principal;
+  senderName : text;
+  snapId : nat;
+};
+type FriendRequestsResult = record {
+  incoming : vec FriendRequestView;
+  outgoing : vec FriendRequestView;
+};
+type FriendRequestView = record {
+  createdAt : int;
+  id : nat;
+  name : text;
+  "principal" : principal;
+  username : text;
+};
+type ExternalBlob = blob;
+type ConversationItem = record {
+  createdAt : int;
+  expirationSeconds : nat;
+  sender : principal;
+  snapId : nat;
+  status : text;
+};
+type ChatListItem = record {
+  friendName : text;
+  friendPrincipal : principal;
+  friendUsername : text;
+  lastActivityAt : int;
+  lastActivityType : text;
+  streakAtRisk : bool;
+  streakCount : nat;
+  unviewedSnapCount : nat;
+  unviewedSnapId : opt nat;
+};
+service : {
+  _caffeineStorageBlobIsLive : (hash : blob) -> (bool) query;
+  _caffeineStorageBlobsToDelete : () -> (vec blob) query;
+  _caffeineStorageConfirmBlobDeletion : (blobs : vec blob) -> ();
+  _caffeineStorageCreateCertificate : (blobHash : text) -> (_CaffeineStorageCreateCertificateResult);
+  _caffeineStorageRefillCashier : (
+    refillInformation : opt _CaffeineStorageRefillInformation
+  ) -> (_CaffeineStorageRefillResult);
+  _caffeineStorageUpdateGatewayPrincipals : () -> ();
+  blockUser : (target : principal) -> ();
+  deleteStory : (storyId : nat) -> ();
+  getBlockedUsers : () -> (vec UserSearchResult) query;
+  getChatList : () -> (vec ChatListItem) query;
+  getConversation : (friend : principal) -> (vec ConversationItem) query;
+  getFriendRequests : () -> (FriendRequestsResult) query;
+  getFriends : () -> (vec UserSearchResult) query;
+  getFriendsStories : () -> (vec StoryView) query;
+  getInbox : () -> (vec InboxItem) query;
+  getMyStories : () -> (vec StoryView) query;
+  getProfile : () -> (opt Profile) query;
+  getSentSnaps : () -> (vec SentSnapItem) query;
+  getSnapMedia : (snapId : nat) -> (SnapViewResult) query;
+  getStoryMedia : (storyId : nat) -> (StoryMediaResult) query;
+  getStreaks : () -> (vec StreakView) query;
+  postStory : (mediaBlob : ExternalBlob, mediaType : text) -> ();
+  respondToFriendRequest : (requestId : nat, accept : bool) -> ();
+  searchUsers : (prefix : text) -> (vec UserSearchResult) query;
+  sendFriendRequest : (to : principal) -> ();
+  sendSnap : (
+    recipients : vec principal,
+    mediaBlob : ExternalBlob,
+    mediaType : text,
+    expirationSeconds : nat,
+  ) -> ();
+  setProfile : (name : text, username : text) -> ();
+  unblockUser : (target : principal) -> ();
+  unfriend : (target : principal) -> ();
+  viewSnap : (snapId : nat) -> (SnapViewResult);
+};
